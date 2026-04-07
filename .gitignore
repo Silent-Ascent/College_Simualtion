@@ -2,8 +2,12 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
+<<<<<<< HEAD
 .utmp/
 [Ll]ibrary/
+=======
+.utmp//[Ll]ibrary/
+>>>>>>> d40c5d1a34bb8567500c0d42d9b76cd78ac87db0
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
