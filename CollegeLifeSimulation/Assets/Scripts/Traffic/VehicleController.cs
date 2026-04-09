@@ -13,23 +13,22 @@ public class VehicleController : MonoBehaviour
     [Header("Behaviour")]
     [SerializeField] private bool breaksTrafficRules = false;
 
+    [Header("Traffic Light Stop Settings")]
+    [SerializeField] private Transform stopPoint;   // assign near signal
+    [SerializeField] private float stopDistance = 10f;
+
     private float speed;
     private bool isMoving = true;
     private TrafficLightController trafficLight;
 
     private void Start()
     {
-        // Randomise speed for each vehicle
         speed = Random.Range(minSpeed, maxSpeed);
-
-        // Find the traffic light in the scene
         trafficLight = TrafficLightController.Instance;
 
-        // Place vehicle at start waypoint
         if (startWaypoint != null)
             transform.position = startWaypoint.position;
 
-        // Face toward end waypoint
         if (endWaypoint != null)
         {
             Vector3 dir = endWaypoint.position - transform.position;
@@ -43,13 +42,13 @@ public class VehicleController : MonoBehaviour
     {
         if (endWaypoint == null) return;
 
-        // Check traffic light
-        if (trafficLight != null)
+        // 🔥 FIXED LOGIC (stop only near signal)
+        if (trafficLight != null && stopPoint != null)
         {
             bool lightIsRed = trafficLight.CurrentState == TrafficLightController.LightState.Red;
+            float distanceToStop = Vector3.Distance(transform.position, stopPoint.position);
 
-            // Stop for red unless this vehicle breaks rules
-            if (lightIsRed && !breaksTrafficRules)
+            if (lightIsRed && distanceToStop < stopDistance && !breaksTrafficRules)
             {
                 isMoving = false;
             }
@@ -72,7 +71,6 @@ public class VehicleController : MonoBehaviour
         }
         else
         {
-            // Reached end — teleport back to start (loop)
             transform.position = startWaypoint.position;
         }
     }
@@ -83,6 +81,13 @@ public class VehicleController : MonoBehaviour
         {
             Gizmos.color = Color.cyan;
             Gizmos.DrawLine(startWaypoint.position, endWaypoint.position);
+        }
+
+        // 🔍 Show stop distance in Scene
+        if (stopPoint != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(stopPoint.position, stopDistance);
         }
     }
 }
