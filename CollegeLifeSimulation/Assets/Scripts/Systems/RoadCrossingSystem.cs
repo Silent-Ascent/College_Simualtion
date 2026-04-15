@@ -1,12 +1,10 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class RoadCrossingSystem : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private TextMeshProUGUI warningText;
-    [SerializeField] private TextMeshProUGUI statusText;
 
     [Header("Settings")]
     [SerializeField] private float timePenalty = 5f;
@@ -14,6 +12,7 @@ public class RoadCrossingSystem : MonoBehaviour
     private TrafficLightController trafficLight;
     private GameTimer gameTimer;
     private bool playerInRoad = false;
+    private bool penaltyApplied = false;
 
     public static bool PlayerBrokeRules { get; private set; }
 
@@ -29,23 +28,43 @@ public class RoadCrossingSystem : MonoBehaviour
     private void Update()
     {
         if (!playerInRoad) return;
+        if (trafficLight == null) return;
 
-        // Check if player crossed on red
-        if (trafficLight != null &&
-            trafficLight.CurrentState == TrafficLightController.LightState.Red)
+        if (trafficLight.CurrentState == TrafficLightController.LightState.Red)
         {
-            ShowWarning("⚠️ RED LIGHT! DANGEROUS!");
-            PlayerBrokeRules = true;
-        }
-        else if (trafficLight != null &&
-                 trafficLight.CurrentState == TrafficLightController.LightState.Green)
-        {
-            ShowWarning("✅ Safe to cross");
+            ShowWarning(
+                "<size=40><color=green>[ OK ]</color></size>\n" +
+                "<size=28>SAFE TO CROSS</size>\n" +
+                "<size=22>Vehicles have stopped!</size>",
+                Color.white
+            );
             PlayerBrokeRules = false;
         }
-        else
+        else if (trafficLight.CurrentState == TrafficLightController.LightState.Green)
         {
-            ShowWarning("🟡 Caution - Yellow Light");
+            ShowWarning(
+                "<size=40><color=red>[ !! ]</color></size>\n" +
+                "<size=28>DANGER - DO NOT CROSS</size>\n" +
+                "<size=22>Vehicles are moving!\nWait for red light!</size>",
+                Color.white
+            );
+            PlayerBrokeRules = true;
+
+            if (!penaltyApplied && gameTimer != null)
+            {
+                gameTimer.AddPenalty(timePenalty);
+                penaltyApplied = true;
+                Debug.Log("Penalty! Crossed on green light!");
+            }
+        }
+        else if (trafficLight.CurrentState == TrafficLightController.LightState.Yellow)
+        {
+            ShowWarning(
+                "<size=40><color=yellow>[ .. ]</color></size>\n" +
+                "<size=28>CAUTION</size>\n" +
+                "<size=22>Light changing soon!\nGet ready!</size>",
+                Color.white
+            );
         }
     }
 
@@ -54,7 +73,8 @@ public class RoadCrossingSystem : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRoad = true;
-            Debug.Log("Player entered road");
+            penaltyApplied = false;
+            Debug.Log("Player entered crossing zone");
         }
     }
 
@@ -63,26 +83,21 @@ public class RoadCrossingSystem : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRoad = false;
+            PlayerBrokeRules = false;
+            penaltyApplied = false;
 
             if (warningText != null)
                 warningText.gameObject.SetActive(false);
-
-            // Apply time penalty if rule was broken
-            if (PlayerBrokeRules && gameTimer != null)
-            {
-                gameTimer.AddPenalty(timePenalty);
-                Debug.Log($"Time penalty applied: {timePenalty}s");
-                PlayerBrokeRules = false;
-            }
         }
     }
 
-    private void ShowWarning(string message)
+    private void ShowWarning(string message, Color color)
     {
         if (warningText != null)
         {
             warningText.gameObject.SetActive(true);
             warningText.text = message;
+            warningText.color = color;
         }
     }
 }
