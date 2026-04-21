@@ -34,7 +34,7 @@ public class GameTimer : MonoBehaviour
 
         timeRemaining -= Time.deltaTime;
 
-        if (timeRemaining <= 30f && !IsLate)
+        if (timeRemaining <= 120f && !IsLate)
         {
             IsLate = true;
             ShowMessage(
