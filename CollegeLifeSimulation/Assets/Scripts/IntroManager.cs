@@ -5,7 +5,7 @@ using System.Collections;
 
 public class IntroManager : MonoBehaviour
 {
-    [Header("UI Texts")]
+    // Text elements used in the intro
     [SerializeField] private TextMeshProUGUI topText;
     [SerializeField] private TextMeshProUGUI topLeftText;
     [SerializeField] private TextMeshProUGUI bottomRightText;
@@ -13,30 +13,31 @@ public class IntroManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI taglineText;
     [SerializeField] private TextMeshProUGUI skipText;
 
-    [Header("Camera")]
+    // Camera for intro movement
     [SerializeField] private Camera introCamera;
     [SerializeField] private Transform cameraEndPoint;
 
-    [Header("Settings")]
+    // Basic settings
     [SerializeField] private float cameraMoveSpeed = 0.3f;
-    [SerializeField] private float typeSpeed = 0.05f; // lower = faster typing
+    [SerializeField] private float typeSpeed = 0.05f;
     [SerializeField] private string gameSceneName = "SampleScene";
 
     private void Start()
     {
-        HideAll();
+        ClearAllText(); // make sure nothing is visible at start
         StartCoroutine(PlayIntro());
     }
 
     private void Update()
     {
+        // skip intro on any key press
         if (Input.anyKeyDown)
         {
             StopAllCoroutines();
             LoadGame();
         }
 
-        // Slow camera pan
+        // slow camera movement
         if (introCamera != null && cameraEndPoint != null)
         {
             introCamera.transform.position = Vector3.Lerp(
@@ -47,17 +48,19 @@ public class IntroManager : MonoBehaviour
         }
     }
 
-    private void HideAll()
+    // clears all text fields
+    private void ClearAllText()
     {
-        if (topText != null) topText.text = "";
-        if (topLeftText != null) topLeftText.text = "";
-        if (bottomRightText != null) bottomRightText.text = "";
-        if (centerText != null) centerText.text = "";
-        if (taglineText != null) taglineText.text = "";
-        if (skipText != null)
+        if (topText) topText.text = "";
+        if (topLeftText) topLeftText.text = "";
+        if (bottomRightText) bottomRightText.text = "";
+        if (centerText) centerText.text = "";
+        if (taglineText) taglineText.text = "";
+
+        if (skipText)
         {
             skipText.text = "Press any key to skip";
-            skipText.color = new Color(1, 1, 1, 0.4f);
+            skipText.color = new Color(1f, 1f, 1f, 0.4f);
         }
     }
 
@@ -65,82 +68,95 @@ public class IntroManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
-        // Step 1: Game title types at top
-        topText.color = Color.yellow;
-        yield return TypeWrite(topText, "COLLEGE LIFE SIMULATION");
+        // title
+        topText.color = new Color(1f, 0.92f, 0.4f);
+        yield return TypeText(topText, "COLLEGE LIFE SIMULATION");
+
         yield return new WaitForSeconds(1f);
 
-        // Step 2: Tagline types below
+        // tagline
         taglineText.color = Color.white;
-        yield return TypeWrite(taglineText, "Not real... but close to it");
+        yield return TypeText(taglineText, "Not real... but close to it");
+
         yield return new WaitForSeconds(2f);
 
-        // Step 3: Teachers type in center
-        centerText.color = Color.white;
-        yield return TypeWrite(centerText, "Under the Guidance of");
-        yield return new WaitForSeconds(0.3f);
-        yield return TypeWrite(centerText,
-            "Under the Guidance of\n\nDesp Sanjeev Chamling\nAbhimanu Rimal",
-            true // append mode
-        );
-        yield return new WaitForSeconds(2.5f);
+        // teachers
+        centerText.color = new Color(1f, 0.84f, 0f);
 
-        // Fade out center
+        yield return TypeText(centerText, "Under the Guidance of");
+        yield return new WaitForSeconds(0.3f);
+
+        yield return TypeText(centerText,
+            "Under the Guidance of\n\nSanjeev Chamling\nAvimanyu Rimal",
+            true
+        );
+
+        yield return new WaitForSeconds(2.5f);
         yield return FadeOut(centerText, 1.5f);
 
-        // Step 4: Team name types in center
-        centerText.color = Color.yellow;
-        yield return TypeWrite(centerText, "— Team Undefined —");
+        // group name
+        centerText.color = new Color(1f, 0.92f, 0.4f);
+        yield return TypeText(centerText, "Group X");
+
         yield return new WaitForSeconds(2f);
         yield return FadeOut(centerText, 1f);
 
-        // Step 5: Members type GTA style
-        topLeftText.color = Color.white;
-        bottomRightText.color = Color.white;
+        // members
+        topLeftText.color = new Color(0.4f, 0.8f, 1f);
+        bottomRightText.color = new Color(1f, 0.4f, 0.7f);
 
-        yield return TypeWrite(topLeftText, "Aryan Shahi");
+        yield return TypeText(topLeftText, "Aryan Shahi");
         yield return new WaitForSeconds(0.5f);
-        yield return TypeWrite(bottomRightText, "Shuvam Ojha");
+
+        yield return TypeText(bottomRightText, "Shuvam Ojha");
         yield return new WaitForSeconds(3f);
 
-        // Fade everything out
+        // fade everything
         StartCoroutine(FadeOut(topText, 1f));
         StartCoroutine(FadeOut(taglineText, 1f));
         StartCoroutine(FadeOut(topLeftText, 1f));
         StartCoroutine(FadeOut(bottomRightText, 1f));
-        if (skipText != null) StartCoroutine(FadeOut(skipText, 1f));
+
+        if (skipText)
+            StartCoroutine(FadeOut(skipText, 1f));
 
         yield return new WaitForSeconds(1.5f);
 
         LoadGame();
     }
 
-    private IEnumerator TypeWrite(TextMeshProUGUI text, string message, bool append = false)
+    // simple typing effect
+    private IEnumerator TypeText(TextMeshProUGUI text, string message, bool append = false)
     {
         if (!append) text.text = "";
 
-        string currentText = append ? text.text : "";
-        string newPart = append ? message.Substring(currentText.Length) : message;
+        string current = append ? text.text : "";
+        string newPart = append ? message.Substring(current.Length) : message;
 
-        foreach (char letter in newPart)
+        foreach (char c in newPart)
         {
-            currentText += letter;
-            text.text = currentText;
+            current += c;
+            text.text = current;
             yield return new WaitForSeconds(typeSpeed);
         }
     }
 
+    // fade text out smoothly
     private IEnumerator FadeOut(TextMeshProUGUI text, float speed)
     {
+        if (text == null) yield break;
+
         Color c = text.color;
-        float alpha = 1f;
-        while (alpha > 0f)
+        float a = 1f;
+
+        while (a > 0f)
         {
-            alpha -= Time.deltaTime * speed;
-            c.a = alpha;
+            a -= Time.deltaTime * speed;
+            c.a = a;
             text.color = c;
             yield return null;
         }
+
         text.text = "";
     }
 
