@@ -20,10 +20,21 @@ public class RollCallSystem : MonoBehaviour
 
     public static RollCallSystem Instance;
 
-    public enum RollCallState { WaitingForStudent, WaitingForScan, ScanComplete }
-    public RollCallState State { get; private set; } = RollCallState.WaitingForStudent;
+    public enum RollCallState
+    {
+        WaitingForStudent,
+        WaitingForScan,
+        ScanComplete
+    }
+
+    public RollCallState State { get; private set; } =
+        RollCallState.WaitingForStudent;
 
     private bool scanComplete = false;
+
+    // Player references
+    private GameObject player;
+    private Animator playerAnimator;
 
     private void Awake()
     {
@@ -32,23 +43,33 @@ public class RollCallSystem : MonoBehaviour
 
     private void Start()
     {
+        // Hide UI at start
         if (rollCallPanel != null)
             rollCallPanel.SetActive(false);
 
         if (scanPromptText != null)
             scanPromptText.gameObject.SetActive(false);
+
+        // Find player
+        player = GameObject.FindGameObjectWithTag("Player");
+
+        if (player != null)
+        {
+            playerAnimator = player.GetComponent<Animator>();
+        }
     }
 
-    // Called when player sits down
+    // Called after player sits
     public void PlayerSeated()
     {
-        Debug.Log("Player seated — roll call will begin shortly");
+        Debug.Log("Player seated. Roll call starting soon...");
         StartCoroutine(StartRollCallAfterDelay());
     }
 
     private IEnumerator StartRollCallAfterDelay()
     {
         yield return new WaitForSeconds(rollCallDelay);
+
         BeginRollCall();
     }
 
@@ -56,43 +77,59 @@ public class RollCallSystem : MonoBehaviour
     {
         State = RollCallState.WaitingForScan;
 
+        // Show UI
         if (rollCallPanel != null)
             rollCallPanel.SetActive(true);
 
         if (rollCallStatusText != null)
-            rollCallStatusText.text = "ROLL CALL — Please scan your attendance at the door!";
+        {
+            rollCallStatusText.text =
+                "ROLL CALL - Please scan your fingerprint";
+        }
 
-        // Re-enable player movement so they can walk to scanner
+        // Make player stand up
         if (PlayerSitDown.Instance != null)
             PlayerSitDown.Instance.StandUp();
 
         if (scanPromptText != null)
         {
             scanPromptText.gameObject.SetActive(true);
-            scanPromptText.text = "Walk to the biometric scanner by the door";
+            scanPromptText.text =
+                "Walk to the biometric scanner";
         }
 
-        Debug.Log("Roll call started — player must go scan");
+        Debug.Log("Player must now scan fingerprint");
     }
 
     private void Update()
     {
-        if (State != RollCallState.WaitingForScan) return;
-        if (scanComplete) return;
-        if (biometricScannerObject == null) return;
+        if (State != RollCallState.WaitingForScan)
+            return;
 
-        // Check if player is close enough to scanner
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null) return;
+        if (scanComplete)
+            return;
 
-        float dist = Vector3.Distance(player.transform.position,
-            biometricScannerObject.transform.position);
+        if (biometricScannerObject == null)
+            return;
 
-        if (dist < scanRange)
+        if (player == null)
+            return;
+
+        // Distance check
+        float distance = Vector3.Distance(
+            player.transform.position,
+            biometricScannerObject.transform.position
+        );
+
+        if (distance < scanRange)
         {
             if (scanPromptText != null)
-                scanPromptText.text = "Press [E] to scan fingerprint";
+            {
+                scanPromptText.text =
+                    "Press [E] to scan fingerprint";
+            }
 
+            // Scan input
             if (Input.GetKeyDown(KeyCode.E))
             {
                 StartCoroutine(PerformScan());
@@ -101,46 +138,81 @@ public class RollCallSystem : MonoBehaviour
         else
         {
             if (scanPromptText != null)
-                scanPromptText.text = "Walk to the biometric scanner by the door";
+            {
+                scanPromptText.text =
+                    "Walk to the biometric scanner";
+            }
         }
     }
 
     private IEnumerator PerformScan()
     {
         scanComplete = true;
+
         State = RollCallState.ScanComplete;
 
+        // PLAY FINGERPRINT ANIMATION
+        if (playerAnimator != null)
+        {
+            playerAnimator.SetTrigger("ScanFingerprint");
+        }
+
+        // Hide prompt
         if (scanPromptText != null)
             scanPromptText.gameObject.SetActive(false);
 
-        // Green flash on scanner
+        // Scanner green flash
         if (biometricScannerObject != null)
         {
-            Renderer scannerRenderer = biometricScannerObject
-                .transform.Find("Scanner_Sensor")?.GetComponent<Renderer>();
+            Renderer scannerRenderer =
+                biometricScannerObject
+                .transform.Find("Scanner_Sensor")
+                ?.GetComponent<Renderer>();
 
             if (scannerRenderer != null)
             {
-                Color original = scannerRenderer.material.color;
+                Color originalColor =
+                    scannerRenderer.material.color;
+
                 scannerRenderer.material.color = Color.green;
+
                 yield return new WaitForSeconds(0.5f);
-                scannerRenderer.material.color = original;
+
+                scannerRenderer.material.color = originalColor;
             }
         }
 
+        // Success UI
         if (rollCallStatusText != null)
-            rollCallStatusText.text = "Attendance recorded!";
+        {
+            rollCallStatusText.text =
+                "Attendance Recorded Successfully!";
+        }
+
+        // Optional effect
+        if (scanSuccessEffect != null)
+        {
+            scanSuccessEffect.SetActive(true);
+        }
 
         yield return new WaitForSeconds(2f);
 
+        // Hide roll call UI
         if (rollCallPanel != null)
             rollCallPanel.SetActive(false);
 
-        // Trigger teacher arrival event
-        TeacherEventTrigger teacherEvent = FindObjectOfType<TeacherEventTrigger>();
-        teacherEvent?.SendMessage("TriggerTeacherArrival",
-            SendMessageOptions.DontRequireReceiver);
+        // Trigger teacher arrival
+        TeacherEventTrigger teacherEvent =
+            FindObjectOfType<TeacherEventTrigger>();
 
-        Debug.Log("Biometric scan complete — attendance marked!");
+        if (teacherEvent != null)
+        {
+            teacherEvent.SendMessage(
+                "TriggerTeacherArrival",
+                SendMessageOptions.DontRequireReceiver
+            );
+        }
+
+        Debug.Log("Fingerprint scanned successfully");
     }
 }

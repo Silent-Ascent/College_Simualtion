@@ -202,18 +202,10 @@ public class PlayerHealth : MonoBehaviour
             deathMessagePanel.SetActive(true);
             if (deathMessageText != null)
                 deathMessageText.text =
-                    "You were going to college to build your future...\n" +
-                    "not to destroy it.\n\n" +
                     "Don't make your parents regret raising you.\n" +
                     "Follow the traffic rules. Be safe on the road.\n\n" +
                     "They are waiting for you at home.\n" +
-                    "They are proud of you.\n" +
-                    "Don't break their hearts.\n\n" +
                     ". . . . . . . . . .\n\n" +
-                    "Congratulations.\n\n" +
-                    "You left your parents alone forever.\n" +
-                    "No more college. No more future.\n" +
-                    "No more coming home.\n\n" +
                     "Good Afterlife.";
         }
 

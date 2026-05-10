@@ -58,7 +58,7 @@ public class CollegeEntryManager : MonoBehaviour
         Debug.Log("Player arrived ON TIME — proceeding to classroom");
 
         if (entryStatusText != null)
-            entryStatusText.text = "✅ On time! Go to your classroom.";
+            entryStatusText.text = " On time! Go to your classroom.";
 
         if (onTimePanel != null)
             onTimePanel.SetActive(true);
@@ -78,7 +78,7 @@ public class CollegeEntryManager : MonoBehaviour
         Debug.Log("Player arrived LATE — must go to SSD");
 
         if (entryStatusText != null)
-            entryStatusText.text = "⚠️ You are late! Go to the SSD office.";
+            entryStatusText.text = " You are late! Go to the SSD office.";
 
         if (latePanel != null)
             latePanel.SetActive(true);

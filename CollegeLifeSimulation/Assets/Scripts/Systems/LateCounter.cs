@@ -40,7 +40,7 @@ public class LateCounter : MonoBehaviour
     private void UpdateLateUI()
     {
         if (lateCountText != null)
-            lateCountText.text = $"⚠️ Late: {lateStrikes}/{maxLateStrikes}";
+            lateCountText.text = $"Late: {lateStrikes}/{maxLateStrikes}";
     }
 
     private void TriggerPunishment()
