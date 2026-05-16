@@ -103,7 +103,7 @@ public class RaycastInfoSystem : MonoBehaviour
         promptText.gameObject.SetActive(false);
     }
 
-    private void ClosePanel()
+    public void ClosePanel()
     {
         panelOpen = false;
         infoPanel.SetActive(false);

@@ -13,10 +13,6 @@ public class ClassroomEntryTrigger : MonoBehaviour
             entered = true;
             Debug.Log("Player entered classroom!");
 
-            // Trigger teacher arrival event
-            TeacherEventTrigger teacherEvent = FindObjectOfType<TeacherEventTrigger>();
-            if (teacherEvent != null)
-                teacherEvent.SendMessage("TriggerTeacherArrival", SendMessageOptions.DontRequireReceiver);
 
             // Stop timer
             GameTimer.Instance?.StopTimer();

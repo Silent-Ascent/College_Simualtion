@@ -201,17 +201,6 @@ public class RollCallSystem : MonoBehaviour
         if (rollCallPanel != null)
             rollCallPanel.SetActive(false);
 
-        // Trigger teacher arrival
-        TeacherEventTrigger teacherEvent =
-            FindObjectOfType<TeacherEventTrigger>();
-
-        if (teacherEvent != null)
-        {
-            teacherEvent.SendMessage(
-                "TriggerTeacherArrival",
-                SendMessageOptions.DontRequireReceiver
-            );
-        }
 
         Debug.Log("Fingerprint scanned successfully");
     }
