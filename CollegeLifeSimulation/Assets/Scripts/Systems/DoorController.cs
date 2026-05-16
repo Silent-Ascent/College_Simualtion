@@ -17,7 +17,7 @@ public class DoorController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E)) // press E to toggle
+        if (Input.GetKeyDown(KeyCode.K)) // press K to toggle
         {
             isOpen = !isOpen;
         }

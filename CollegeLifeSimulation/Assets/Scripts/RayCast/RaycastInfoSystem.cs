@@ -18,23 +18,31 @@ public class RaycastInfoSystem : MonoBehaviour
 
     [Header("Keys")]
     [SerializeField] private KeyCode openKey = KeyCode.O;
-    [SerializeField] private KeyCode closeKey = KeyCode.C;
 
     private InfoData currentInfo;
     private bool panelOpen;
 
     private void Start()
     {
-        infoPanel.SetActive(false);
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
 
         if (promptText != null)
             promptText.gameObject.SetActive(false);
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void Update()
     {
-        CheckRaycast();
+        // Don't raycast while panel is open
+        if (!panelOpen)
+        {
+            CheckRaycast();
+        }
 
+        // Open panel
         if (Input.GetKeyDown(openKey))
         {
             if (currentInfo != null && !panelOpen)
@@ -42,18 +50,13 @@ public class RaycastInfoSystem : MonoBehaviour
                 OpenPanel();
             }
         }
-
-        if (Input.GetKeyDown(closeKey))
-        {
-            if (panelOpen)
-            {
-                ClosePanel();
-            }
-        }
     }
 
     private void CheckRaycast()
     {
+        if (playerCamera == null)
+            return;
+
         Ray ray = new Ray(
             playerCamera.transform.position,
             playerCamera.transform.forward
@@ -77,35 +80,61 @@ public class RaycastInfoSystem : MonoBehaviour
             {
                 currentInfo = info;
 
-                promptText.gameObject.SetActive(true);
-                promptText.text = "[O] Learn about: " + info.Title;
+                if (promptText != null)
+                {
+                    promptText.gameObject.SetActive(true);
+                    promptText.text = "[O] Learn about: " + info.Title;
+                }
 
                 return;
             }
         }
 
         currentInfo = null;
-        promptText.gameObject.SetActive(false);
+
+        if (promptText != null)
+        {
+            promptText.gameObject.SetActive(false);
+        }
     }
 
     private void OpenPanel()
     {
         panelOpen = true;
 
-        titleText.text = currentInfo.Title;
-        descriptionText.text = currentInfo.Description;
+        if (titleText != null)
+            titleText.text = currentInfo.Title;
+
+        if (descriptionText != null)
+            descriptionText.text = currentInfo.Description;
 
         if (objectImage != null)
             objectImage.sprite = currentInfo.ObjectSprite;
 
-        infoPanel.SetActive(true);
+        if (infoPanel != null)
+            infoPanel.SetActive(true);
 
-        promptText.gameObject.SetActive(false);
+        if (promptText != null)
+            promptText.gameObject.SetActive(false);
+
+        // Unlock cursor for UI interaction
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        Debug.Log("Panel Opened");
     }
 
     public void ClosePanel()
     {
         panelOpen = false;
-        infoPanel.SetActive(false);
+
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
+
+        // Lock cursor back to game
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        Debug.Log("Panel Closed");
     }
 }

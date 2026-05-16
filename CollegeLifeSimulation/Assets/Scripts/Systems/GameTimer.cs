@@ -38,7 +38,7 @@ public class GameTimer : MonoBehaviour
         {
             IsLate = true;
             ShowMessage(
-                "⚠️ HURRY UP!\nYou are running late to college!\nYour future is waiting!",
+                " HURRY UP!\nYou are running late to college!\nMight have to go to the SSD",
                 Color.yellow,
                 4f
             );
@@ -88,12 +88,8 @@ public class GameTimer : MonoBehaviour
         }
 
         ShowMessage(
-            "⏰ TIME'S UP!\n\n" +
+            " TIME'S UP!\n\n" +
             "You were too late for college.\n\n" +
-            "Your parents woke up early,\n" +
-            "made your breakfast,\n" +
-            "and waited at the door...\n\n" +
-            "But you never made it on time.\n\n" +
             "Press R to try again.",
             Color.red,
             0f // 0 = stays on screen forever
@@ -105,7 +101,7 @@ public class GameTimer : MonoBehaviour
     public void AddPenalty(float seconds)
     {
         timeRemaining -= seconds;
-        ShowMessage($"⚠️ PENALTY! -{seconds} seconds!", Color.yellow, 2f);
+        ShowMessage($" PENALTY! -{seconds} seconds!", Color.yellow, 2f);
     }
 
     public void StopTimer()
@@ -119,7 +115,7 @@ public class GameTimer : MonoBehaviour
 
         int minutes = Mathf.FloorToInt(timeRemaining / 60);
         int seconds = Mathf.FloorToInt(timeRemaining % 60);
-        timerText.text = $"⏱ {minutes:00}:{seconds:00}";
+        timerText.text = $"{minutes:00}:{seconds:00}";
 
         if (timeRemaining <= 30f)
             timerText.color = Color.red;
